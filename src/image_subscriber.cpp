@@ -64,6 +64,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_subscriber");
   ImageSubscriber ic;
   
+  // Dummy variables - Replace with your own
   cv::Mat a;
   cv::Mat b;
   
