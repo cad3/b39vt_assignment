@@ -160,7 +160,7 @@ class ImageSubscriber
      							if(imagess[a].compare(aliveString) == 0)
      							{
      								ic.setPicType(3);
-	      							ic.setThreshold(0.385);
+	      							ic.setThreshold(0.7);
 	    							std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -169,7 +169,7 @@ class ImageSubscriber
      							if(imagess[a].compare(deadString) == 0)
      							{
      								ic.setPicType(4);
-	      							ic.setThreshold(0.391);
+	      							ic.setThreshold(0.7);
 	    							std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -177,7 +177,7 @@ class ImageSubscriber
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-	     							ic.setThreshold(0.3);
+	     							ic.setThreshold(0.4);
 	    							std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
