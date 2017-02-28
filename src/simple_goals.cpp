@@ -25,7 +25,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
     //intializing variable to change robot's velocity
 
     //setting minium distance to avoid object
-    double minDist = 1.5;
+    double minDist = .5;
 
     double lasrange = (scan_msg->ranges.size());
 
@@ -48,7 +48,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
      {
 
         totali += disti;
-        std::cout << "this is totali " << totali << std::endl;
+       // std::cout << "this is totali " << totali << std::endl;
 
     }
     }
@@ -135,13 +135,15 @@ void moveForward()
 {
     geometry_msgs::Twist twist;
 
+    std::cout << "obi:     " << obi << std::endl;
+    std::cout << "obj:     " << obj << std::endl;
+    std::cout << "obk:     " << obk << std::endl;
 
 
-
-    if(obj == false && obi == false && obk == false)
+    if(obj == true && obi == true && obk == true)
     {
 
-        std::cout << "the robot should NOT be moving obstacles on all sides" << std::endl;
+        std::cout << "the robot should be turning" << std::endl;
 
         twist.linear.x = 0;
         twist.linear.y = 0;
@@ -149,9 +151,11 @@ void moveForward()
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = 0.5;
+        twist.angular.z = .6;
 
         operatorPublisher.publish(twist);
+
+
     }
 
     if(obi == false && obj == true && obk == false )
@@ -159,18 +163,34 @@ void moveForward()
 
         std::cout << "the robot should be moving in j direction" << std::endl;
 
-        twist.linear.x = -(x_value);
+        twist.linear.x = x_value;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = 1.5;
+        twist.angular.z = 0;
 
         operatorPublisher.publish(twist);
     }
 
     if(obi == true && obk == false && obj == false )
+    {
+
+        std::cout << "the robot should be moving in the i direction" << std::endl;
+
+        twist.linear.x = x_value;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = .85;
+
+        operatorPublisher.publish(twist);
+    }
+
+    if(obi == false && obk == true && obj == true )
     {
 
         std::cout << "the robot should be moving in the i direction" << std::endl;
@@ -181,15 +201,17 @@ void moveForward()
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = 0.5;
+        twist.angular.z = -.6;
 
         operatorPublisher.publish(twist);
     }
 
-    if(obi == false && obj == false && obk == true)
+
+
+    if(obi == true && obk == false && obj == true )
     {
 
-        std::cout << "the robot should be moving in k direction" << std::endl;
+        std::cout << "the robot should be moving in the i direction" << std::endl;
 
         twist.linear.x = 0;
         twist.linear.y = 0;
@@ -197,7 +219,25 @@ void moveForward()
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = -0.5;
+        twist.angular.z = .6;
+
+        operatorPublisher.publish(twist);
+    }
+
+
+
+    if(obi == false && obj == false && obk == true)
+    {
+
+        std::cout << "the robot should be moving in k direction" << std::endl;
+
+        twist.linear.x = x_value;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = -.6;
 
         operatorPublisher.publish(twist);
 
@@ -218,6 +258,8 @@ void moveForward()
 
         operatorPublisher.publish(twist);
     }
+
+
 
 
 }
