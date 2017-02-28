@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <math.h>
 
-bool ob;
+bool obi;
+bool obj;
+bool obk;
 
 
 void moveForward();
@@ -28,90 +30,105 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
     double lasrange = (scan_msg->ranges.size());
 
     //go through all possible ranges and see if there are obstacles
-    int i =0;
+    int i;
+    double disti = 0;
     double totali =0;
-    int j=0;
+    int j;
+    double distj = 0;
     double totalj =0;
-    int k=0;
+    int k;
+    double distk =0;
     double totalk = 0;
 
-    for (i=0; i < lasrange/3; i++)
+    for (i=0; i < (lasrange/3); i++)
     {
+        disti = (scan_msg->ranges[i]);
 
-
-     if(!isnan(totali) && !isinf(totali))
+     if(!isnan(disti) && !isinf(disti))
      {
-        totali = totali + (scan_msg->ranges[i]);
-        std::cout << "this is ranges[i]" << (scan_msg->ranges[i]) << std::endl;
+
+        totali += disti;
+        std::cout << "this is totali " << totali << std::endl;
 
     }
     }
-    std::cout << "totali average: " << totali/(lasrange/3) << std::endl;
-    std::cout << "lasrange/3: " << lasrange/3 << std::endl;
+    std::cout << "totali outside of loop " << totali << std::endl;
+    //std::cout << "totali average: " << totali/(lasrange/3) << std::endl;
+    //std::cout << "lasrange/3: " << lasrange/3 << std::endl;
 
     if(( totali/(lasrange/3) <= minDist && !isnan(totali) && !isinf(totali)))
     {
         //std::cout << "toali average: " << totali/(lasrange/3) << std::endl;
-        ob = true;
+        obi = true;
         //std::cout << "The robot should stop!!!!!!!" << std::endl;
+
+
     }
     if(( totali/(lasrange/3) >= minDist && !isnan(totali) && !isinf(totali)))
     {
         //std::cout << "section 1 NO obstacle" << std::endl;
-        ob = false;
+        obi = false;
 
         //std::cout << "The robot should be going at the set velocity" << std::endl;
     }
 
     for (j=lasrange/3; j < 2*(lasrange/3); j++)
     {
-        if(!isnan(totalj) && !isinf(totalj))
+        distj = scan_msg->ranges[j];
+        if(!isnan(distj) && !isinf(distj))
         {
-            totalj = totalj + (scan_msg->ranges[j]);
-            //std::cout << "this is totalj " << totalj << std::endl;
-            std::cout << "this is ranges[j]" << (scan_msg->ranges[j]) << std::endl;
+
+            totalj += distj;
+           // std::cout << "this is totalj " << totalj << std::endl;
+            //std::cout << "this is distj " << distj << std::endl;
         }
      }
 
-    std::cout << "totalj average: " << totalj/(lasrange/3) << std::endl;
+    //std::cout << "totalj average: " << totalj/(lasrange/3) << std::endl;
 
     if(( totalj/(lasrange/3) <= minDist && !isnan(totalj) && !isinf(totalj)))
     {
        // std::cout << "section 2 obstacle" << std::endl;
-        ob = true;
+        obj = true;
         //std::cout << "The robot should stop!!!!!!!" << std::endl;
+
+
     }
     if(( totalj/(lasrange/3) >= minDist && !isnan(totalj) && !isinf(totalj)))
     {
         //std::cout << "section 2 NO obstacle" << std::endl;
-        ob = false;
+        obj = false;
         //std::cout << "The robot should be going at the set velocity" << std::endl;
     }
 
     for (k=2*(lasrange/3); k<= lasrange; k++)
     {
-        if(!isnan(totalk) && !isinf(totalk))
+        distk = (scan_msg->ranges[k]);
+        if(!isnan(distk) && !isinf(distk))
         {
-            totalk = totalk + (scan_msg->ranges[k]);
+
+            totalk += distk;
             //std::cout << "this is totalk " << totalk << std::endl;
-            std::cout << "this is ranges[k]" << (scan_msg->ranges[k]) << std::endl;
+            //std::cout << "this is distk " << distk << std::endl;
         }
     }
 
-    std::cout << "totalk average: " << totalk/(lasrange/3) << std::endl;
+    //std::cout << "totalk average: " << totalk/(lasrange/3) << std::endl;
 
     if( ( totalk/(lasrange/3) <= minDist && !isnan(totalk) && !isinf(totalk)))
     {
-        ob = true;
+        obk = true;
         //std::cout << "section 3 obstacle" << std::endl;
         //std::cout << "The robot should stop!!!!!!!" << std::endl;
+
     }
     if(( totalk/(lasrange/3) >= minDist && !isnan(totalk) && !isinf(totalk)))
     {
         //std::cout << "section 3 NO obstacle" << std::endl;
-        ob = false;
+        obk = false;
         //std::cout << "The robot should be going at the set velocity" << std::endl;
     }
+    //std::cout << ob << std::endl;
 
 }
 void moveForward()
@@ -119,7 +136,7 @@ void moveForward()
     geometry_msgs::Twist twist;
 
 
-    if(ob == false)
+    if(obj == false)
     {
 
         std::cout << "the robot should be moving" << std::endl;
@@ -135,7 +152,7 @@ void moveForward()
         operatorPublisher.publish(twist);
     }
 
-    else
+    if(obj == true)
     {
 
         std::cout << "THE ROBOT SHOULD NOT BE MOVING!!!!" << std::endl;
@@ -168,9 +185,9 @@ int main(int argc, char **argv)
 
     //added
 
-    operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1);
+    operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
-    ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1, scanCallback);
+    ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
 
 
     //added
