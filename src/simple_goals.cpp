@@ -25,7 +25,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
     //intializing variable to change robot's velocity
 
     //setting minium distance to avoid object
-    double minDist = 1;
+    double minDist = 1.5;
 
     double lasrange = (scan_msg->ranges.size());
 
@@ -136,10 +136,77 @@ void moveForward()
     geometry_msgs::Twist twist;
 
 
-    if(obj == false)
+
+
+    if(obj == false && obi == false && obk == false)
     {
 
-        std::cout << "the robot should be moving" << std::endl;
+        std::cout << "the robot should NOT be moving obstacles on all sides" << std::endl;
+
+        twist.linear.x = 0;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = 0.5;
+
+        operatorPublisher.publish(twist);
+    }
+
+    if(obi == false && obj == true && obk == false )
+    {
+
+        std::cout << "the robot should be moving in j direction" << std::endl;
+
+        twist.linear.x = -(x_value);
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = 1.5;
+
+        operatorPublisher.publish(twist);
+    }
+
+    if(obi == true && obk == false && obj == false )
+    {
+
+        std::cout << "the robot should be moving in the i direction" << std::endl;
+
+        twist.linear.x = 0;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = 0.5;
+
+        operatorPublisher.publish(twist);
+    }
+
+    if(obi == false && obj == false && obk == true)
+    {
+
+        std::cout << "the robot should be moving in k direction" << std::endl;
+
+        twist.linear.x = 0;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = -0.5;
+
+        operatorPublisher.publish(twist);
+
+    }
+
+    if(obi == false && obj == false && obk == false)
+    {
+
+        std::cout << "the robot should be moving in a striaght line as no obstacles" << std::endl;
 
         twist.linear.x = x_value;
         twist.linear.y = 0;
@@ -150,23 +217,6 @@ void moveForward()
         twist.angular.z = 0;
 
         operatorPublisher.publish(twist);
-    }
-
-    if(obj == true)
-    {
-
-        std::cout << "THE ROBOT SHOULD NOT BE MOVING!!!!" << std::endl;
-
-        twist.linear.x = 0;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
-
-        twist.angular.x = 0;
-        twist.angular.y = 0;
-        twist.angular.z = 0;
-
-        operatorPublisher.publish(twist);
-
     }
 
 
