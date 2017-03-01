@@ -5,213 +5,178 @@
 #include <stdio.h>
 #include <math.h>
 
+
+
+//initiating methods
 void moveForward();
 void scanCallback();
 
-
+//declaring publisher
 ros::Publisher operatorPublisher;
 
-
+//declaring speed of robot, if its not turning
 float normal_speed = .09;
+//declaring speed of robot, if it's turning
 float turn_speed = .15;
+//speed of rotation, if turning left
 float left = .6;
+//speed of rotation, if turning right
 float right= -.6;
 
+//minium distance for the robot to avoid obstacles
 double minDist = .35;
 
+//boolean value which declares whether or not an object is in the i section of laserscan
 bool obi;
-int i;
+//disti = ranges[i] in for loop where i is incrementing
 double disti;
+//totali is all instances of disti added together unless nan or infinity
 double totali;
+//the average is calculated using the totali and ranges.size()/3
 double averagei;
 
 bool obj;
-int j;
 double distj;
 double totalj;
 double averagej;
 
 bool obk;
-int k;
 double distk;
 double totalk;
 double averagek;
 
-
+//method to tell the robot where the obstacles are
 void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 {
-    //std::cout << "In scan call back" << std::endl;
-    //intializing variable to change robot's velocity
 
-    //setting minium distance to avoid object
-
+    //lasrange is a variable which stores ranges.size()
     double lasrange = (scan_msg->ranges.size());
 
-    //go through all possible ranges and see if there are obstacles
-
+    //resetting values to zero
     disti = 0;
     totali =0;
     averagei = 0;
-
-
 
     distj = 0;
     totalj =0;
     averagej = 0;
 
-
     distk =0;
     totalk = 0;
     averagek = 0;
 
-    for (i=0; i < (lasrange/3); i++)
+    //for loop to calculate total number of distances in the first third of the array ranges from LaserScan
+    for (int i=0; i < (lasrange/3); i++)
     {
         disti = (scan_msg->ranges[i]);
 
-     if(!isnan(disti) && !isinf(disti))
-     {
-
-        totali += disti;
-       // std::cout << "this is totali " << totali << std::endl;
-
+        //conditional statements to make sure infinity and nan aren't added into the totali found
+        if(!isnan(disti) && !isinf(disti))
+        {
+            totali += disti;
+        }
     }
-    }
-    //std::cout << "totali outside of loop " << totali << std::endl;
-    std::cout << "totali average: " << totali/(lasrange/3) << std::endl;
-    //std::cout << "lasrange/3: " << lasrange/3 << std::endl;
 
+    //average distance in section i
     averagei = totali/(lasrange/3);
 
-    if(( averagei <= minDist && !isnan(totali) && !isinf(totali)))
+   //if averagei is less or equal to the minDist then there's an obstacle
+    if(averagei <= minDist)
     {
-        //std::cout << "toali average: " << totali/(lasrange/3) << std::endl;
         obi = true;
-        //std::cout << "The robot should stop!!!!!!!" << std::endl;
-
-
     }
-    if(( averagei >= minDist && !isnan(totali) && !isinf(totali)))
-    {
-        //std::cout << "section 1 NO obstacle" << std::endl;
+
+    //if averagi is greater or equal to the minDist then there's NO obstacle
+    if(averagei >= minDist)
+    {   
         obi = false;
-
-        //std::cout << "The robot should be going at the set velocity" << std::endl;
     }
 
-    for (j=lasrange/3; j < 2*(lasrange/3); j++)
+    //same approach as used for i above but with the second two thirds of ranges[] looked at (j)
+    for (int j=lasrange/3; j < 2*(lasrange/3); j++)
     {
         distj = scan_msg->ranges[j];
+
         if(!isnan(distj) && !isinf(distj))
         {
-
             totalj += distj;
-           // std::cout << "this is totalj " << totalj << std::endl;
-            //std::cout << "this is distj " << distj << std::endl;
         }
      }
 
-    std::cout << "totalj average: " << totalj/(lasrange/3) << std::endl;
-
     averagej = totalj/(lasrange/3);
 
-    if(( averagej <= minDist && !isnan(totalj) && !isinf(totalj)))
+    if(averagej <= minDist)
     {
-       // std::cout << "section 2 obstacle" << std::endl;
         obj = true;
-        //std::cout << "The robot should stop!!!!!!!" << std::endl;
-
-
-    }
-    if(( averagej >= minDist && !isnan(totalj) && !isinf(totalj)))
-    {
-        //std::cout << "section 2 NO obstacle" << std::endl;
-        obj = false;
-        //std::cout << "The robot should be going at the set velocity" << std::endl;
     }
 
-    for (k=2*(lasrange/3); k<= lasrange; k++)
+    if(averagej >= minDist)
+    { 
+        obj = false;  
+    }
+
+    //same approach as used for j above but with last third of ranges[] looked at (k)
+    for (int k=2*(lasrange/3); k<= lasrange; k++)
     {
         distk = (scan_msg->ranges[k]);
+
         if(!isnan(distk) && !isinf(distk))
         {
-
             totalk += distk;
-            //std::cout << "this is totalk " << totalk << std::endl;
-            //std::cout << "this is distk " << distk << std::endl;
         }
     }
 
-    std::cout << "totalk average: " << totalk/(lasrange/3) << std::endl;
-
     averagek = totalk/(lasrange/3);
-    if( (averagek <= minDist && !isnan(totalk) && !isinf(totalk)))
-    {
-        obk = true;
-        //std::cout << "section 3 obstacle" << std::endl;
-        //std::cout << "The robot should stop!!!!!!!" << std::endl;
 
-    }
-    if(( averagek >= minDist && !isnan(totalk) && !isinf(totalk)))
+    if(averagek <= minDist)
     {
-        //std::cout << "section 3 NO obstacle" << std::endl;
-        obk = false;
-        //std::cout << "The robot should be going at the set velocity" << std::endl;
+        obk = true;       
     }
-    //std::cout << ob << std::endl;
+
+    if(averagek >= minDist)
+    {
+        obk = false;
+    }
 
 }
+
+//method that sets the velocity of the robot
 void moveForward()
 {
+    //declaring variable to switch velocity
     geometry_msgs::Twist twist;
 
-    std::cout << "obi:     " << obi << std::endl;
-    std::cout << "obj:     " << obj << std::endl;
-    std::cout << "obk:     " << obk << std::endl;
-
-
+    //if there's obstacles on all sides
     if((obj == true) && (obi == true) && (obk == true))
     {
-
+        //if obstacle furthest from robot is in section i
         if(averagei >= averagej && averagei >= averagek)
         {
-            std::cout << "turning right" << std::endl;
-
+            //robot moving & turning right
             twist.linear.x = turn_speed;
-            twist.linear.y = 0;
-            twist.linear.z = 0;
 
-            twist.angular.x = 0;
-            twist.angular.y = 0;
             twist.angular.z = right;
 
             operatorPublisher.publish(twist);
         }
 
+        //if obstacle furthest from robot is in section j
         if(averagej >= averagei && averagej >= averagek)
         {
-            std::cout << "go backwards" << std::endl;
-
+            //robot going backwards
             twist.linear.x = -(normal_speed);
-            twist.linear.y = 0;
-            twist.linear.z = 0;
 
-            twist.angular.x = 0;
-            twist.angular.y = 0;
             twist.angular.z = 0;
 
             operatorPublisher.publish(twist);
         }
 
+        //if obstacle furthest from robot is in section k
         if(averagek >= averagei && averagek >= averagej)
         {
-            std::cout << "go left" << std::endl;
-
+            //robot moving and going left
             twist.linear.x = turn_speed;
-            twist.linear.y = 0;
-            twist.linear.z = 0;
 
-            twist.angular.x = 0;
-            twist.angular.y = 0;
             twist.angular.z = left;
 
             operatorPublisher.publish(twist);
@@ -222,27 +187,22 @@ void moveForward()
     if((obi == false) && (obj == true) && (obk == false) )
     {
 
-        if(averagei >= averagek){
-        std::cout << "turning right" << std::endl;
+        if(averagei >= averagek)
+        {
 
-        twist.linear.x = turn_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
+            //robot moving & turning right
+             twist.linear.x = turn_speed;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
-        twist.angular.z = right;
+             twist.angular.z = right;
 
-        operatorPublisher.publish(twist);
+            operatorPublisher.publish(twist);
         }
 
-        else {
+        else
+        {
+            //robot moving & turning left
             twist.linear.x = turn_speed;
-            twist.linear.y = 0;
-            twist.linear.z = 0;
 
-            twist.angular.x = 0;
-            twist.angular.y = 0;
             twist.angular.z = left;
 
             operatorPublisher.publish(twist);
@@ -251,15 +211,9 @@ void moveForward()
 
     if((obi == true) && (obj == false) && (obk == true) )
     {
-
-        std::cout << "moving forward " << std::endl;
-
+        //robot just moving forward
         twist.linear.x = normal_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = 0;
 
         operatorPublisher.publish(twist);
@@ -267,15 +221,9 @@ void moveForward()
 
     if((obi == true) && (obj == false) && (obk == false))
     {
-
-        std::cout << "moving left" << std::endl;
-
+        //robot moving and turning left
         twist.linear.x = turn_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = left;
 
         operatorPublisher.publish(twist);
@@ -283,15 +231,9 @@ void moveForward()
 
     if((obi == false) && (obj == true) && (obk == true))
     {
-
-        std::cout << "moving right" << std::endl;
-
+        //robot moving & turning right
         twist.linear.x = turn_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = right;
 
         operatorPublisher.publish(twist);
@@ -301,15 +243,9 @@ void moveForward()
 
     if((obi == true) && (obj == true)  && (obk == false) )
     {
-
-        std::cout << "going left " << std::endl;
-
+        //robot just turning left
         twist.linear.x = 0;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = left;
 
         operatorPublisher.publish(twist);
@@ -319,39 +255,23 @@ void moveForward()
 
     if((obi == false) && (obj == false) && (obk == true))
     {
-
-        std::cout << "moving right " << std::endl;
-
+        //robot moving and turning right
         twist.linear.x = turn_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = right;
 
         operatorPublisher.publish(twist);
-
     }
 
     if((obi == false) && (obj == false) && (obk == false))
     {
-
-        std::cout << "moving straight " << std::endl;
-
+        //robot moving in a straight line
         twist.linear.x = normal_speed;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
 
-        twist.angular.x = 0;
-        twist.angular.y = 0;
         twist.angular.z = 0;
 
         operatorPublisher.publish(twist);
     }
-
-
-
 
 }
 
@@ -359,13 +279,15 @@ void moveForward()
 int main(int argc, char **argv)
 {
 
-
+    //declaring node
     ros::init(argc, argv, "move_turtle");
 
     ros::NodeHandle nodeHandle;
 
+    //set publisher which determines velocity of the robot
     operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
+    //subscribe to topic scan and input into method scanCallback
     ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
 
     ros::Rate loopRate(15);
@@ -373,7 +295,7 @@ int main(int argc, char **argv)
     while(ros::ok())
     {
         moveForward();
-        ROS_INFO("Published twist");
+        ROS_INFO("Published Twist");
         loopRate.sleep();
         ros::spinOnce();
     }
