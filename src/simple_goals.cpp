@@ -5,18 +5,37 @@
 #include <stdio.h>
 #include <math.h>
 
-bool obi;
-bool obj;
-bool obk;
-
-
 void moveForward();
 void scanCallback();
 
 
 ros::Publisher operatorPublisher;
-float x_value = .15;
 
+
+float normal_speed = .09;
+float turn_speed = .15;
+float left = .6;
+float right= -.6;
+
+double minDist = .35;
+
+bool obi;
+int i;
+double disti;
+double totali;
+double averagei;
+
+bool obj;
+int j;
+double distj;
+double totalj;
+double averagej;
+
+bool obk;
+int k;
+double distk;
+double totalk;
+double averagek;
 
 
 void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
@@ -25,20 +44,25 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
     //intializing variable to change robot's velocity
 
     //setting minium distance to avoid object
-    double minDist = .5;
 
     double lasrange = (scan_msg->ranges.size());
 
     //go through all possible ranges and see if there are obstacles
-    int i;
-    double disti = 0;
-    double totali =0;
-    int j;
-    double distj = 0;
-    double totalj =0;
-    int k;
-    double distk =0;
-    double totalk = 0;
+
+    disti = 0;
+    totali =0;
+    averagei = 0;
+
+
+
+    distj = 0;
+    totalj =0;
+    averagej = 0;
+
+
+    distk =0;
+    totalk = 0;
+    averagek = 0;
 
     for (i=0; i < (lasrange/3); i++)
     {
@@ -52,11 +76,13 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 
     }
     }
-    std::cout << "totali outside of loop " << totali << std::endl;
-    //std::cout << "totali average: " << totali/(lasrange/3) << std::endl;
+    //std::cout << "totali outside of loop " << totali << std::endl;
+    std::cout << "totali average: " << totali/(lasrange/3) << std::endl;
     //std::cout << "lasrange/3: " << lasrange/3 << std::endl;
 
-    if(( totali/(lasrange/3) <= minDist && !isnan(totali) && !isinf(totali)))
+    averagei = totali/(lasrange/3);
+
+    if(( averagei <= minDist && !isnan(totali) && !isinf(totali)))
     {
         //std::cout << "toali average: " << totali/(lasrange/3) << std::endl;
         obi = true;
@@ -64,7 +90,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 
 
     }
-    if(( totali/(lasrange/3) >= minDist && !isnan(totali) && !isinf(totali)))
+    if(( averagei >= minDist && !isnan(totali) && !isinf(totali)))
     {
         //std::cout << "section 1 NO obstacle" << std::endl;
         obi = false;
@@ -84,9 +110,11 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
         }
      }
 
-    //std::cout << "totalj average: " << totalj/(lasrange/3) << std::endl;
+    std::cout << "totalj average: " << totalj/(lasrange/3) << std::endl;
 
-    if(( totalj/(lasrange/3) <= minDist && !isnan(totalj) && !isinf(totalj)))
+    averagej = totalj/(lasrange/3);
+
+    if(( averagej <= minDist && !isnan(totalj) && !isinf(totalj)))
     {
        // std::cout << "section 2 obstacle" << std::endl;
         obj = true;
@@ -94,7 +122,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 
 
     }
-    if(( totalj/(lasrange/3) >= minDist && !isnan(totalj) && !isinf(totalj)))
+    if(( averagej >= minDist && !isnan(totalj) && !isinf(totalj)))
     {
         //std::cout << "section 2 NO obstacle" << std::endl;
         obj = false;
@@ -113,16 +141,17 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
         }
     }
 
-    //std::cout << "totalk average: " << totalk/(lasrange/3) << std::endl;
+    std::cout << "totalk average: " << totalk/(lasrange/3) << std::endl;
 
-    if( ( totalk/(lasrange/3) <= minDist && !isnan(totalk) && !isinf(totalk)))
+    averagek = totalk/(lasrange/3);
+    if( (averagek <= minDist && !isnan(totalk) && !isinf(totalk)))
     {
         obk = true;
         //std::cout << "section 3 obstacle" << std::endl;
         //std::cout << "The robot should stop!!!!!!!" << std::endl;
 
     }
-    if(( totalk/(lasrange/3) >= minDist && !isnan(totalk) && !isinf(totalk)))
+    if(( averagek >= minDist && !isnan(totalk) && !isinf(totalk)))
     {
         //std::cout << "section 3 NO obstacle" << std::endl;
         obk = false;
@@ -140,30 +169,92 @@ void moveForward()
     std::cout << "obk:     " << obk << std::endl;
 
 
-    if(obj == true && obi == true && obk == true)
+    if((obj == true) && (obi == true) && (obk == true))
     {
 
-        std::cout << "the robot should be turning" << std::endl;
+        if(averagei >= averagej && averagei >= averagek)
+        {
+            std::cout << "turning right" << std::endl;
 
-        twist.linear.x = 0;
+            twist.linear.x = turn_speed;
+            twist.linear.y = 0;
+            twist.linear.z = 0;
+
+            twist.angular.x = 0;
+            twist.angular.y = 0;
+            twist.angular.z = right;
+
+            operatorPublisher.publish(twist);
+        }
+
+        if(averagej >= averagei && averagej >= averagek)
+        {
+            std::cout << "go backwards" << std::endl;
+
+            twist.linear.x = -(normal_speed);
+            twist.linear.y = 0;
+            twist.linear.z = 0;
+
+            twist.angular.x = 0;
+            twist.angular.y = 0;
+            twist.angular.z = 0;
+
+            operatorPublisher.publish(twist);
+        }
+
+        if(averagek >= averagei && averagek >= averagej)
+        {
+            std::cout << "go left" << std::endl;
+
+            twist.linear.x = turn_speed;
+            twist.linear.y = 0;
+            twist.linear.z = 0;
+
+            twist.angular.x = 0;
+            twist.angular.y = 0;
+            twist.angular.z = left;
+
+            operatorPublisher.publish(twist);
+        }
+
+    }
+
+    if((obi == false) && (obj == true) && (obk == false) )
+    {
+
+        if(averagei >= averagek){
+        std::cout << "turning right" << std::endl;
+
+        twist.linear.x = turn_speed;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = .6;
+        twist.angular.z = right;
 
         operatorPublisher.publish(twist);
+        }
 
+        else {
+            twist.linear.x = turn_speed;
+            twist.linear.y = 0;
+            twist.linear.z = 0;
 
+            twist.angular.x = 0;
+            twist.angular.y = 0;
+            twist.angular.z = left;
+
+            operatorPublisher.publish(twist);
+        }
     }
 
-    if(obi == false && obj == true && obk == false )
+    if((obi == true) && (obj == false) && (obk == true) )
     {
 
-        std::cout << "the robot should be moving in j direction" << std::endl;
+        std::cout << "moving forward " << std::endl;
 
-        twist.linear.x = x_value;
+        twist.linear.x = normal_speed;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
@@ -174,26 +265,44 @@ void moveForward()
         operatorPublisher.publish(twist);
     }
 
-    if(obi == true && obk == false && obj == false )
+    if((obi == true) && (obj == false) && (obk == false))
     {
 
-        std::cout << "the robot should be moving in the i direction" << std::endl;
+        std::cout << "moving left" << std::endl;
 
-        twist.linear.x = x_value;
+        twist.linear.x = turn_speed;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = .85;
+        twist.angular.z = left;
 
         operatorPublisher.publish(twist);
     }
 
-    if(obi == false && obk == true && obj == true )
+    if((obi == false) && (obj == true) && (obk == true))
     {
 
-        std::cout << "the robot should be moving in the i direction" << std::endl;
+        std::cout << "moving right" << std::endl;
+
+        twist.linear.x = turn_speed;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = right;
+
+        operatorPublisher.publish(twist);
+    }
+
+
+
+    if((obi == true) && (obj == true)  && (obk == false) )
+    {
+
+        std::cout << "going left " << std::endl;
 
         twist.linear.x = 0;
         twist.linear.y = 0;
@@ -201,54 +310,36 @@ void moveForward()
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = -.6;
+        twist.angular.z = left;
 
         operatorPublisher.publish(twist);
     }
 
 
 
-    if(obi == true && obk == false && obj == true )
+    if((obi == false) && (obj == false) && (obk == true))
     {
 
-        std::cout << "the robot should be moving in the i direction" << std::endl;
+        std::cout << "moving right " << std::endl;
 
-        twist.linear.x = 0;
+        twist.linear.x = turn_speed;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
         twist.angular.x = 0;
         twist.angular.y = 0;
-        twist.angular.z = .6;
-
-        operatorPublisher.publish(twist);
-    }
-
-
-
-    if(obi == false && obj == false && obk == true)
-    {
-
-        std::cout << "the robot should be moving in k direction" << std::endl;
-
-        twist.linear.x = x_value;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
-
-        twist.angular.x = 0;
-        twist.angular.y = 0;
-        twist.angular.z = -.6;
+        twist.angular.z = right;
 
         operatorPublisher.publish(twist);
 
     }
 
-    if(obi == false && obj == false && obk == false)
+    if((obi == false) && (obj == false) && (obk == false))
     {
 
-        std::cout << "the robot should be moving in a striaght line as no obstacles" << std::endl;
+        std::cout << "moving straight " << std::endl;
 
-        twist.linear.x = x_value;
+        twist.linear.x = normal_speed;
         twist.linear.y = 0;
         twist.linear.z = 0;
 
@@ -273,18 +364,9 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nodeHandle;
 
-    //TurtleOperator turtleOperator;
-
-    //added
-
     operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
     ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
-
-
-    //added
-
-    std::cout << "Starting to spin …" << std::endl;
 
     ros::Rate loopRate(15);
 
