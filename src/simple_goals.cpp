@@ -4,6 +4,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <stdio.h>
 #include <math.h>
+#include <kobuki_msgs/Led.h>
 
 
 
@@ -13,6 +14,11 @@ void scanCallback();
 
 //declaring publisher
 ros::Publisher operatorPublisher;
+ros::Publisher left_light;
+ros::Publisher right_light;
+
+geometry_msgs::Twist twist;
+kobuki_msgs::Led ledd;
 
 //declaring speed of robot, if its not turning
 float normal_speed = .09;
@@ -144,7 +150,8 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 void moveForward()
 {
     //declaring variable to switch velocity
-    geometry_msgs::Twist twist;
+
+    //lights
 
     //if there's obstacles on all sides
     if((obj == true) && (obi == true) && (obk == true))
@@ -157,6 +164,13 @@ void moveForward()
 
             twist.angular.z = right;
 
+            //led1 light green
+            ledd.value = 1;
+            left_light.publish(ledd);
+            //led2 light off
+            ledd.value = 0;
+            right_light.publish(ledd);
+
             operatorPublisher.publish(twist);
         }
 
@@ -168,6 +182,11 @@ void moveForward()
 
             twist.angular.z = 0;
 
+            //both led1 & led2 are off
+            ledd.value = 0;
+            left_light.publish(ledd);
+            right_light.publish(ledd);
+
             operatorPublisher.publish(twist);
         }
 
@@ -178,6 +197,13 @@ void moveForward()
             twist.linear.x = turn_speed;
 
             twist.angular.z = left;
+
+            //led2 is red
+            ledd.value = 3;
+            right_light.publish(ledd);
+            //led1 is off
+            ledd.value = 0;
+            left_light.publish(ledd);
 
             operatorPublisher.publish(twist);
         }
@@ -195,6 +221,13 @@ void moveForward()
 
              twist.angular.z = right;
 
+             //led1 green
+             ledd.value = 1;
+             left_light.publish(ledd);
+             //led2 off
+             ledd.value = 0;
+             right_light.publish(ledd);
+
             operatorPublisher.publish(twist);
         }
 
@@ -204,6 +237,13 @@ void moveForward()
             twist.linear.x = turn_speed;
 
             twist.angular.z = left;
+
+            //led2 red
+            ledd.value = 3;
+            right_light.publish(ledd);
+            //led1 off
+            ledd.value = 0;
+            left_light.publish(ledd);
 
             operatorPublisher.publish(twist);
         }
@@ -216,6 +256,11 @@ void moveForward()
 
         twist.angular.z = 0;
 
+        //led1 & led2 off
+        ledd.value = 0;
+        left_light.publish(ledd);
+        right_light.publish(ledd);
+
         operatorPublisher.publish(twist);
     }
 
@@ -226,6 +271,11 @@ void moveForward()
 
         twist.angular.z = left;
 
+        //led2 red && led1 off
+        ledd.value = 0;
+        right_light.publish(ledd);
+        left_light.publish(ledd);
+
         operatorPublisher.publish(twist);
     }
 
@@ -235,6 +285,12 @@ void moveForward()
         twist.linear.x = turn_speed;
 
         twist.angular.z = right;
+
+        //led1 green && led2 off
+        ledd.value = 1;
+        left_light.publish(ledd);
+        ledd.value = 0;
+        right_light.publish(ledd);
 
         operatorPublisher.publish(twist);
     }
@@ -248,6 +304,12 @@ void moveForward()
 
         twist.angular.z = left;
 
+        //led2 red && led1 off
+        ledd.value = 3;
+        right_light.publish(ledd);
+        ledd.value = 0;
+        left_light.publish(ledd);
+
         operatorPublisher.publish(twist);
     }
 
@@ -260,6 +322,12 @@ void moveForward()
 
         twist.angular.z = right;
 
+        //led1 green && led2 off
+        ledd.value = 1;
+        left_light.publish(ledd);
+        ledd.value = 0;
+        right_light.publish(ledd);
+
         operatorPublisher.publish(twist);
     }
 
@@ -269,6 +337,11 @@ void moveForward()
         twist.linear.x = normal_speed;
 
         twist.angular.z = 0;
+
+        //led1 & led2 off
+        ledd.value = 0;
+        left_light.publish(ledd);
+        right_light.publish(ledd);
 
         operatorPublisher.publish(twist);
     }
@@ -287,6 +360,10 @@ int main(int argc, char **argv)
     //set publisher which determines velocity of the robot
     operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
+    left_light = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
+
+    right_light = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
+
     //subscribe to topic scan and input into method scanCallback
     ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
 
@@ -296,6 +373,7 @@ int main(int argc, char **argv)
     {
         moveForward();
         ROS_INFO("Published Twist");
+        ROS_INFO("Published Led");
         loopRate.sleep();
         ros::spinOnce();
     }
