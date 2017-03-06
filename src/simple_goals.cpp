@@ -7,39 +7,30 @@
 #include <kobuki_msgs/Led.h>
 
 
-
 //initiating methods
 void moveForward();
 void scanCallback();
 
 //declaring publisher
 ros::Publisher operatorPublisher;
-ros::Publisher left_light;
-ros::Publisher right_light;
+ros::Publisher led2;
+ros::Publisher led1;
 
 geometry_msgs::Twist twist;
 kobuki_msgs::Led ledd;
 
-//declaring speed of robot, if its not turning
-float normal_speed = .09;
-//declaring speed of robot, if it's turning
-float turn_speed = .15;
-//speed of rotation, if turning left
-float left = .6;
-//speed of rotation, if turning right
-float right= -.6;
 
-//minium distance for the robot to avoid obstacles
-double minDist = .35;
+float normal_speed = .1; //declaring speed of robot, if its not turning
+float turn_speed = .08;    //declaring speed of robot, if it's turning
+float left = .95;          //speed of rotation, if turning left
+float right= -.95;         //speed of rotation, if turning right
 
-//boolean value which declares whether or not an object is in the i section of laserscan
-bool obi;
-//disti = ranges[i] in for loop where i is incrementing
-double disti;
-//totali is all instances of disti added together unless nan or infinity
-double totali;
-//the average is calculated using the totali and ranges.size()/3
-double averagei;
+double minDist = .45;      //minium distance for the robot to avoid obstacles
+
+bool obi;                 //boolean value which declares whether or not an object is in the i section of laserscan
+double disti;             //disti = ranges[i] in for loop where i is incrementing
+double totali;            //totali is all instances of disti added together unless nan or infinity
+double averagei;          //the average is calculated using the totali and ranges.size()/3
 
 bool obj;
 double distj;
@@ -51,13 +42,9 @@ double distk;
 double totalk;
 double averagek;
 
-//method to tell the robot where the obstacles are
-void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
+void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg) //method to tell the robot where the obstacles are
 {
-
-    //lasrange is a variable which stores ranges.size()
-    double lasrange = (scan_msg->ranges.size());
-
+    double lasrange = (scan_msg->ranges.size());  //lasrange is a variable which stores ranges.size()
     //resetting values to zero
     disti = 0;
     totali =0;
@@ -146,66 +133,49 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg)
 
 }
 
-//method that sets the velocity of the robot
-void moveForward()
+void moveForward()     //method that sets the velocity of the robot
 {
     //declaring variable to switch velocity
-
     //lights
-
     //if there's obstacles on all sides
     if((obj == true) && (obi == true) && (obk == true))
     {
-        //if obstacle furthest from robot is in section i
-        if(averagei >= averagej && averagei >= averagek)
+
+        std::cout << "obstacles everywhere" << std::endl;
+
+        if(averagei >= averagej && averagei >= averagek)  //if obstacle furthest from robot is in section i
         {
             //robot moving & turning right
             twist.linear.x = turn_speed;
-
             twist.angular.z = right;
 
-            //led1 light green
-            ledd.value = 1;
-            left_light.publish(ledd);
-            //led2 light off
+            ledd.value = 3;
+            led1.publish(ledd);
             ledd.value = 0;
-            right_light.publish(ledd);
-
-            operatorPublisher.publish(twist);
+            led2.publish(ledd);
         }
 
-        //if obstacle furthest from robot is in section j
-        if(averagej >= averagei && averagej >= averagek)
+        if(averagej >= averagei && averagej >= averagek)  //if obstacle furthest from robot is in section j
         {
             //robot going backwards
             twist.linear.x = -(normal_speed);
-
             twist.angular.z = 0;
 
-            //both led1 & led2 are off
             ledd.value = 0;
-            left_light.publish(ledd);
-            right_light.publish(ledd);
-
-            operatorPublisher.publish(twist);
+            led1.publish(ledd);
+            led2.publish(ledd);
         }
 
-        //if obstacle furthest from robot is in section k
-        if(averagek >= averagei && averagek >= averagej)
+        if(averagek >= averagei && averagek >= averagej)  //if obstacle furthest from robot is in section k
         {
             //robot moving and going left
             twist.linear.x = turn_speed;
-
             twist.angular.z = left;
 
-            //led2 is red
-            ledd.value = 3;
-            right_light.publish(ledd);
-            //led1 is off
+            ledd.value = 1;
+            led2.publish(ledd);
             ledd.value = 0;
-            left_light.publish(ledd);
-
-            operatorPublisher.publish(twist);
+            led1.publish(ledd);
         }
 
     }
@@ -213,160 +183,128 @@ void moveForward()
     if((obi == false) && (obj == true) && (obk == false) )
     {
 
+        std::cout << "obstacle in front" << std::endl;
         if(averagei >= averagek)
         {
-
-            //robot moving & turning right
+             //robot moving & turning right
              twist.linear.x = turn_speed;
-
              twist.angular.z = right;
 
-             //led1 green
-             ledd.value = 1;
-             left_light.publish(ledd);
-             //led2 off
+             ledd.value = 3;
+             led1.publish(ledd);
              ledd.value = 0;
-             right_light.publish(ledd);
+             led2.publish(ledd);
 
-            operatorPublisher.publish(twist);
         }
 
         else
         {
             //robot moving & turning left
             twist.linear.x = turn_speed;
-
             twist.angular.z = left;
 
-            //led2 red
-            ledd.value = 3;
-            right_light.publish(ledd);
-            //led1 off
+            ledd.value = 1;
+            led2.publish(ledd);
             ledd.value = 0;
-            left_light.publish(ledd);
+            led1.publish(ledd);
 
-            operatorPublisher.publish(twist);
         }
     }
 
     if((obi == true) && (obj == false) && (obk == true) )
     {
+
         //robot just moving forward
         twist.linear.x = normal_speed;
-
         twist.angular.z = 0;
 
-        //led1 & led2 off
         ledd.value = 0;
-        left_light.publish(ledd);
-        right_light.publish(ledd);
+        led1.publish(ledd);
+        led2.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
 
     if((obi == true) && (obj == false) && (obk == false))
     {
+
         //robot moving and turning left
         twist.linear.x = turn_speed;
-
         twist.angular.z = left;
 
-        //led2 red && led1 off
+        ledd.value = 1;
+        led2.publish(ledd);
         ledd.value = 0;
-        right_light.publish(ledd);
-        left_light.publish(ledd);
+        led1.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
 
     if((obi == false) && (obj == true) && (obk == true))
     {
+
         //robot moving & turning right
         twist.linear.x = turn_speed;
-
         twist.angular.z = right;
 
-        //led1 green && led2 off
-        ledd.value = 1;
-        left_light.publish(ledd);
+        ledd.value = 3;
+        led1.publish(ledd);
         ledd.value = 0;
-        right_light.publish(ledd);
+        led2.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
-
-
 
     if((obi == true) && (obj == true)  && (obk == false) )
     {
-        //robot just turning left
-        twist.linear.x = 0;
 
+        twist.linear.x = 0;
         twist.angular.z = left;
 
-        //led2 red && led1 off
-        ledd.value = 3;
-        right_light.publish(ledd);
+        ledd.value = 1;
+        led2.publish(ledd);
         ledd.value = 0;
-        left_light.publish(ledd);
+        led1.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
-
-
 
     if((obi == false) && (obj == false) && (obk == true))
     {
-        //robot moving and turning right
         twist.linear.x = turn_speed;
-
         twist.angular.z = right;
 
-        //led1 green && led2 off
-        ledd.value = 1;
-        left_light.publish(ledd);
+        ledd.value = 3;
+        led1.publish(ledd);
         ledd.value = 0;
-        right_light.publish(ledd);
+        led2.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
 
     if((obi == false) && (obj == false) && (obk == false))
     {
-        //robot moving in a straight line
         twist.linear.x = normal_speed;
-
         twist.angular.z = 0;
 
-        //led1 & led2 off
         ledd.value = 0;
-        left_light.publish(ledd);
-        right_light.publish(ledd);
+        led1.publish(ledd);
+        led2.publish(ledd);
 
-        operatorPublisher.publish(twist);
     }
 
+    operatorPublisher.publish(twist);
 }
-
 
 int main(int argc, char **argv)
 {
-
     //declaring node
     ros::init(argc, argv, "move_turtle");
-
     ros::NodeHandle nodeHandle;
-
+    
     //set publisher which determines velocity of the robot
     operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
-    left_light = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
-
-    right_light = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
-
+    led2 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
+    led1 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
+    
     //subscribe to topic scan and input into method scanCallback
     ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
-
     ros::Rate loopRate(15);
 
     while(ros::ok())
