@@ -1,13 +1,5 @@
 #include "b39vt_assignment/image_processing1.hpp"
 
-int alive_num_matches;
-int dead_num_matches;
-int fire_num_matches;
-int nuclear_num_matches;
-int biohazard_num_matches;
-int smoking_num_matches;
-int toxic_num_matches;
-int danger_num_matches;
 
 std::vector<cv::Mat> loadTemplates()
 {
@@ -134,8 +126,7 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	// Check that the order in which the images are loaded is the same as here. This depends on the names of the images since they are ordered alphabetically when loaded.
 	
 	if(match == 0)
-	{
-        biohazard_num_matches = max_num_matches;
+    {
 		if ( max_num_matches < 5 )
 			{
                 std::cout << " Not enough matches for biohazard " << std::endl;
@@ -152,8 +143,7 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	}
 
 	if(match == 1)
-	{
-        danger_num_matches = max_num_matches;
+    {
 		if ( max_num_matches < 5 )
 			{
                  std::cout << " Not enough matches for danger " << std::endl;
@@ -170,8 +160,7 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	}
 
 	if(match == 2)
-	{
-        fire_num_matches = max_num_matches;
+    {
 		if ( max_num_matches < 2 )
 			{
                  std::cout << " Not enough matches for fire" << std::endl;
@@ -187,9 +176,8 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 			}
 	}
 	
-	if(match == 3)
-	{
-        alive_num_matches = max_num_matches;
+    if(match == 3)
+    {
         std::cout << "max_num_matches for man ALIVE is equal to " << max_num_matches << std::endl;
         if ( max_num_matches < 10 )
 			{
@@ -197,18 +185,17 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	 			 return "NOTHING";
 
 			}
-		
-		else
-			{
-                std::cout << " MAN_ALIVE MATCH " << std::endl;
-				return "MAN_ALIVE";
 
-			}
+        else
+            {
+                std::cout << " MAN_ALIVE MATCH " << std::endl;
+                return "MAN_ALIVE";
+
+            }
 	}	
 
 	if(match == 4)
-	{
-        dead_num_matches = max_num_matches;
+    {
         std::cout << "max_num_matches for man DEAD is equal to " << max_num_matches << std::endl;
         if ( max_num_matches < 9)
 			{
@@ -216,18 +203,17 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	 			 return "NOTHING";
 
 			}
-		
-		else
-			{
-                std::cout << " MAN_DEAD MATCH " << std::endl;
-				return "MAN_DEAD";
 
-			}
-	}
+        else
+            {
+                std::cout << " MAN_DEAD MATCH " << std::endl;
+                return "MAN_DEAD";
+
+            }
+    }
 
 	if(match == 5)
-	{
-        smoking_num_matches = max_num_matches;
+    {
         if ( max_num_matches < 2 )
 			{
                  std::cout << " Not enough matches for non smoking" << std::endl;
@@ -244,8 +230,7 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	}
 
 	if(match == 6)
-	{
-        nuclear_num_matches = max_num_matches;
+    {
 		if ( max_num_matches < 5 )
 			{
                  std::cout << " Not enough matches for radioactive " << std::endl;
@@ -262,8 +247,7 @@ std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& temp
 	}
 
 	if(match == 7)
-	{
-        toxic_num_matches = max_num_matches;
+    {
 		if ( max_num_matches < 5 )
 			{
                  std::cout << " Not enough matches for toxic" << std::endl;
