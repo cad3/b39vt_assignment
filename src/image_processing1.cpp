@@ -1,4 +1,7 @@
 #include "b39vt_assignment/image_processing1.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/core/core.hpp>
 
 
 std::vector<cv::Mat> loadTemplates()
@@ -25,9 +28,44 @@ std::vector<cv::Mat> loadTemplates()
 	return templates;
 }
 
+
+cv::Mat redFilter(const cv::Mat& src)
+{
+    std::cout << " TRYING TO DO REDFILTER " << std::endl;
+
+    assert(src.type() == CV_8UC3);
+
+    cv::Mat redOnly;
+    cv::inRange(src, cv::Scalar(10, 10, 0), cv::Scalar(50, 0, 255), redOnly);
+    cv::Scalar sum_red = cv::sum(redOnly);
+    std::cout << " Sum found: " << (sum_red(0))/(10^12) << std::endl;
+
+    return redOnly;
+
+}
+
+
+
 std::string templateMatching(const cv::Mat& im, const std::vector<cv::Mat>& templ)
 {
 	std::vector<int> num_matches;
+
+    //trying to do colour matching
+
+
+       cv::imshow("input", im);
+       cv::waitKey(200);
+
+       cv::Mat redOnly = redFilter(im);
+
+       imshow("redOnly", redOnly);
+       cv::waitKey(200);
+
+
+
+
+    //trying to finish colour matching
+
 	
 	for ( int i = 0; i < templ.size(); ++i )
 	{

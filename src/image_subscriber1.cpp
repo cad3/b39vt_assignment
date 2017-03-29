@@ -81,7 +81,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_subscriber");
   ImageSubscriber ic;
   
-  cv::namedWindow("Templates");
+  //cv::namedWindow("Templates");
   
   // Load templates
   std::vector<cv::Mat> templs = loadTemplates();
