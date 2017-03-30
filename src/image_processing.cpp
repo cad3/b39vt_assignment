@@ -91,13 +91,13 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 
     	if(typePic == 1){
     	
-    		//std::cout << "Matching found in TOXIC " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "Matching found in TOXIC " << maxVal << " The y Point = " << matchLoc.y << "\n";
     	
     	}
     
      	if(typePic == 2){
      	
-    		//std::cout << "Matching found in DANGER " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "Matching found in DANGER " << maxVal << " The y Point = " << matchLoc.y << "\n";
    		 
    		 }
     
@@ -113,25 +113,25 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
     
      	if(typePic == 5){
      	
-    		//std::cout << " MATCH FOUND FOR SMOKING" << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << " MATCH FOUND FOR SMOKING" << maxVal << " The y Point = " << matchLoc.y << "\n";
     	}
     
      	if(typePic == 6){
      
-    		//std::cout << "MATCH FOUND FOR NUCLEAR " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "MATCH FOUND FOR NUCLEAR " << maxVal << " The y Point = " << matchLoc.y << "\n";
    		}
     
      	if(typePic == 7){
-    		//std::cout << "MATCH FOUND FOR FIRE " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "MATCH FOUND FOR FIRE " << maxVal << " The y Point = " << matchLoc.y << "\n";
     	}
 
  		if(typePic == 8){
-    		//std::cout << "MATCH FOUND FOR BIOHAZARD " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "MATCH FOUND FOR BIOHAZARD " << maxVal << " The y Point = " << matchLoc.y << "\n";
    		 }
 
 
 	//not show which template found
-		cv::imshow( match_window, templ );
+		//cv::imshow( match_window, templ );
  		
  		/// Show me what you got
  		cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows 	),   			cv::Scalar::all(0), 2, 8, 0 ); 
@@ -141,7 +141,7 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 	}
 
 	
-	cv::imshow( image_window, img_display );
+	//cv::imshow( image_window, img_display );
 	//so weird camera not shown
 	//cv::imshow( result_window, result ); 
 

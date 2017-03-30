@@ -143,8 +143,8 @@ class ImageSubscriber
 								{
 		
 									ic.setPicType(1);
-	      							ic.setThreshold(0.31);
-	    						//	std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	      							ic.setThreshold(0.35);
+	    							std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -152,7 +152,7 @@ class ImageSubscriber
      							{
      								
      								ic.setPicType(2);
-	      							ic.setThreshold(0.73);
+	      							ic.setThreshold(0.4);
 	    						//	std::cout << "checking for danger template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -160,8 +160,8 @@ class ImageSubscriber
      							if(imagess[a].compare(aliveString) == 0)
      							{
      								ic.setPicType(3);
-	      							ic.setThreshold(0.73);
-	    							std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	      							ic.setThreshold(0.65);
+	    							//std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -169,30 +169,30 @@ class ImageSubscriber
      							if(imagess[a].compare(deadString) == 0)
      							{
      								ic.setPicType(4);
-	      							ic.setThreshold(0.73);
-	    							std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	      							ic.setThreshold(0.65);
+	    							//std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-	     							ic.setThreshold(0.4);
-	    					//		std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	     							ic.setThreshold(0.37);
+	    					//	std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(nuclearString) == 0)
      							{
      								ic.setPicType(6);
-	      							ic.setThreshold(0.5);
+	      							ic.setThreshold(0.7);
 	    						//	std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(fireString) == 0){
      								ic.setPicType(7);
-	     			 				ic.setThreshold(0.6);
+	     			 				ic.setThreshold(0.8);
 	    							//std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
