@@ -34,7 +34,7 @@ class ImageSubscriber
   		ImageSubscriber() : it_(nh_), data_valid(false), OPENCV_WINDOW("Image window")
   		{
     	// Subscribe to input video feed
-    		image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, 
+    		image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1, 
      		 &ImageSubscriber::imageCb, this);
 
 
@@ -103,7 +103,7 @@ class ImageSubscriber
 
  			cv::String toxicString = "/home/turtlebot/toxic.png";
   
-  			cv::String aliveString = "/home/turtlebot/alive.png";
+  			cv::String aliveString = "/home/turtlebot/darkalive.png";
   
   			cv::String deadString = "/home/turtlebot/dead.png";
   
@@ -144,7 +144,7 @@ class ImageSubscriber
 		
 									ic.setPicType(1);
 	      							ic.setThreshold(0.31);
-	    							std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -152,15 +152,15 @@ class ImageSubscriber
      							{
      								
      								ic.setPicType(2);
-	      							ic.setThreshold(0.45);
-	    							std::cout << "checking for danger template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	      							ic.setThreshold(0.73);
+	    						//	std::cout << "checking for danger template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(aliveString) == 0)
      							{
      								ic.setPicType(3);
-	      							ic.setThreshold(0.7);
+	      							ic.setThreshold(0.73);
 	    							std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -169,7 +169,7 @@ class ImageSubscriber
      							if(imagess[a].compare(deadString) == 0)
      							{
      								ic.setPicType(4);
-	      							ic.setThreshold(0.7);
+	      							ic.setThreshold(0.73);
 	    							std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -178,7 +178,7 @@ class ImageSubscriber
      							{
      								ic.setPicType(5);
 	     							ic.setThreshold(0.4);
-	    							std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    					//		std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -186,14 +186,14 @@ class ImageSubscriber
      							{
      								ic.setPicType(6);
 	      							ic.setThreshold(0.5);
-	    							std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(fireString) == 0){
      								ic.setPicType(7);
 	     			 				ic.setThreshold(0.6);
-	    							std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    							//std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -202,7 +202,7 @@ class ImageSubscriber
      							{
      								ic.setPicType(8);
 	     		 					ic.setThreshold(0.4);
-	    							std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    							//std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	

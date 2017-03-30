@@ -59,12 +59,12 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
   	/// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
 	if( match_method  == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED )
 	{
-		std::cout << "Matching Value = " << minVal << "\n";
+		//std::cout << "Matching Value = " << minVal << "\n";
 		matchLoc = minLoc;
 	}
 	else
 	{
-		std::cout << "Matching Value = " << maxVal << "\n";
+		//std::cout << "Matching Value = " << maxVal << "\n";
 		matchLoc = maxLoc;     
 	}
 
@@ -75,6 +75,8 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 	
 		testing = false;
 		
+    		std::cout << "Threshold is too high to get a match " << "\n";
+    	
 	 }
 	
 	else {
@@ -89,42 +91,42 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 
     	if(typePic == 1){
     	
-    		std::cout << "Matching found in TOXIC " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << "Matching found in TOXIC " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
     	
     	}
     
      	if(typePic == 2){
      	
-    		std::cout << "Matching found in DANGER " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << "Matching found in DANGER " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
    		 
    		 }
     
     	 if(typePic == 3){
     	 
-    		std::cout << "MATCH FOUND FOR ALIVE " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << "MATCH FOUND FOR ALIVE & maxVal is: " << maxVal << " The y Point = " << matchLoc.y << "\n";
    		 }
     
      	if(typePic == 4){
      	
-    		std::cout << "MATCH FOUND FOR DEAD " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		std::cout << " MATCH FOUND FOR DEAD & maxVal is: " << maxVal << " The y Point =  " << matchLoc.y << "\n";
     	}
     
      	if(typePic == 5){
      	
-    		std::cout << "MATCH FOUND FOR SMOKING" << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << " MATCH FOUND FOR SMOKING" << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
     	}
     
      	if(typePic == 6){
      
-    		std::cout << "MATCH FOUND FOR NUCLEAR " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << "MATCH FOUND FOR NUCLEAR " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
    		}
     
      	if(typePic == 7){
-    		std::cout << "MATCH FOUND FOR FIRE " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << "MATCH FOUND FOR FIRE " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
     	}
 
  		if(typePic == 8){
-    		std::cout << "MATCH FOUND FOR BIOHAZARD " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
+    		//std::cout << "MATCH FOUND FOR BIOHAZARD " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
    		 }
 
 
