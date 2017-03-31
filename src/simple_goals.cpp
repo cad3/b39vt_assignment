@@ -291,9 +291,9 @@ void moveForward()     //method that sets the velocity of the robot
     operatorPublisher.publish(twist);
 }
 
-int main(int argc, char **argv)
-{
-    //declaring node
+void startObstacleAvoidance(){
+
+  //declaring node
     ros::init(argc, argv, "move_turtle");
     ros::NodeHandle nodeHandle;
     
@@ -316,5 +316,30 @@ int main(int argc, char **argv)
         ros::spinOnce();
     }
 
+}
+
+int main(int argc, char **argv)
+{
+    startObstacleAvoidance();
+
     return EXIT_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

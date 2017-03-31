@@ -31,7 +31,7 @@ void templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
   	img.copyTo( img_display );
 	
 	
-    cv::imshow( template_window, templ );
+   // cv::imshow( template_window, templ );
 
 	cv::waitKey(3);  
 	

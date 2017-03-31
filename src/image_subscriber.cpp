@@ -94,6 +94,9 @@ class ImageSubscriber
 	 		return pictureType;
 		}
 };
+
+
+		
 		int main(int argc, char** argv)
 		{
 
