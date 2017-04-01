@@ -12,7 +12,11 @@
 
 class ImageSubscriber
 {
-    	ros::Publisher distanceP_;
+	double distj;
+    double totalj;
+    double averagej;
+	int count;
+    ros::Publisher distanceP_;
 	bool marking;
 	int pictureType;
 	double thresholdMatch;
@@ -20,7 +24,8 @@ class ImageSubscriber
 	ros::NodeHandle nh_;
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber image_sub_;
-    	int dist;
+	double distTotal;
+    	double dist;
     	geometry_msgs::PointStamped p;
 
     	ros::Subscriber scanSub_;
@@ -116,36 +121,92 @@ class ImageSubscriber
 	 		return pictureType;
 		}
 
-         void processLaserScan (const sensor_msgs::LaserScanConstPtr& scan)
-		{
- 			for (int i=256; i>0; i--)
-			{
 
+
+    void processLaserScan (const sensor_msgs::LaserScanConstPtr& scan)
+		{
+		std::cout << "going through processLaserScan " << "\n";
+		double lasrange = (scan->ranges.size());
+		
+		  distj = 0;
+    	  totalj =0;
+          averagej = 0;
+          
+          
+          
+           //same approach as used for i above but with the second two thirds of ranges[] looked at (j)
+    	for (int j=lasrange/3; j < 2*(lasrange/3); j++)
+    	{
+        	distj = scan->ranges[j];
+
+        	if(!isnan(distj) && !isinf(distj))
+        	{
+        		//std::cout << "Not nan " << "\n";
+            	totalj += distj;
+        	}
+        	
+        	
+     	}
+
+    	averagej = totalj/(lasrange/3);
+          
+		    
+		
+ 		
+		std::cout << "dividing total by:  " << (lasrange/3) << "\n";
+			
+		std::cout << "averagej is:  " << averagej << "\n";
+		std::cout << "setting distance :)   " << "\n";
+		setDistance(averagej);
+		std::cout << "DIST  " << dist << "\n";
+		
+		}
+
+
+         void processLaserScan1 (const sensor_msgs::LaserScanConstPtr& scan)
+		{
+		    count = 0;
+		std::cout << "going through processLaserScan " << "\n";
+ 			for (int i=246; i<266; i++)
+			{
+          
                  if (scan -> ranges[i] == INFINITY || isnan(scan ->ranges[i]))
 					{
-
+					std::cout << "infinity or nan is happening!!!!!! " << "\n";
 					dist = 0;
 					
 					}
 				 else
 					{
-                        dist = scan -> ranges[i];
-        				break;
+					
+					   std::cout << "Not nan " << "\n";
+                        distTotal += scan -> ranges[i];
+    
+        				count++;
+        				
 					}
 			}
+			std::cout << "count is:  " << count << "\n";
+			dist = distTotal/count;
+			std::cout << "dist is:  " << dist << "\n";
+			std::cout << "setting distance :)   " << "\n";
+			setDistance(dist);
 		}
 		
-   		void getDistance(int dist)
+   		void setDistance(double disti)
 		{
-
+			dist = disti;
 			p.header.frame_id = "baselink";
 			p.point.x = dist;
 			p.point.y = 0;
 			p.point.z = 0;
 
-			distanceP_.publish(p);
+			
 		}
-
+		
+		double getDistance(){
+		   return dist; 
+         }
 
 };
 		
@@ -202,7 +263,7 @@ int main(int argc, char** argv)
 
 									ic.setPicType(1);
                                     ic.setThreshold(0.35);
-	    							std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -211,7 +272,7 @@ int main(int argc, char** argv)
      								
      								ic.setPicType(2);
                                     ic.setThreshold(0.4);
-	    							std::cout << "checking for danger template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    							//std::cout << "checking for danger template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -219,7 +280,7 @@ int main(int argc, char** argv)
      							{
      								ic.setPicType(3);
                                     ic.setThreshold(0.65);
-	    							std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -228,15 +289,15 @@ int main(int argc, char** argv)
      							{
      								ic.setPicType(4);
                                     ic.setThreshold(0.65);
-	    							std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-                                    ic.setThreshold(0.37);
-	    							std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.2); //0.37
+	    						//	std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -244,14 +305,14 @@ int main(int argc, char** argv)
      							{
      								ic.setPicType(6);
                                     ic.setThreshold(0.7);
-	    							std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(fireString) == 0){
      								ic.setPicType(7);
                                     ic.setThreshold(0.8);
-	    							std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -260,7 +321,7 @@ int main(int argc, char** argv)
      							{
      								ic.setPicType(8);
 	     		 					ic.setThreshold(0.4);
-	    							std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    						//	std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -270,11 +331,19 @@ int main(int argc, char** argv)
 						
 							if(ic.getMarking())
 								{
-										
+								     
                                      ic.getPublisher().publish(ic.getPointStamped());
-
+                                     
+									std::cout << "Template found!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
 
 								}
+								
+							else
+							{
+									
+									
+									std::cout << "NO TEMPLATE FOUND: " << ic.getDistance() << "\n";
+							}
      
        					}   
                  

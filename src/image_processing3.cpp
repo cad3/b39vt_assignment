@@ -31,7 +31,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
   	img.copyTo( img_display );
 	
 	
-    cv::imshow( template_window, templ );
+    //cv::imshow( template_window, templ );
 
 	cv::waitKey(3);  
 	
@@ -59,12 +59,12 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
   	/// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
 	if( match_method  == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED )
 	{
-		std::cout << "Matching Value = " << minVal << "\n";
+		//std::cout << "Matching Value = " << minVal << "\n";
 		matchLoc = minLoc;
 	}
 	else
 	{
-		std::cout << "Matching Value = " << maxVal << "\n";
+		//std::cout << "Matching Value = " << maxVal << "\n";
 		matchLoc = maxLoc;     
 	}
 
@@ -129,7 +129,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 
 
 	//not show which template found
-		cv::imshow( match_window, templ );
+		//cv::imshow( match_window, templ );
  		
  		/// Show me what you got
  		cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows 	),   			cv::Scalar::all(0), 2, 8, 0 ); 
@@ -139,7 +139,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 	}
 
 	
-	cv::imshow( image_window, img_display );
+	//cv::imshow( image_window, img_display );
 	//so weird camera not shown
 	//cv::imshow( result_window, result ); 
 
