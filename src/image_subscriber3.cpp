@@ -12,11 +12,20 @@
 
 class ImageSubscriber
 {
+	int count;
 	double distj;
     double totalj;
     double averagej;
-	int count;
-    ros::Publisher distanceP_;
+    
+    
+    ros::Publisher aliveMarking;
+    ros::Publisher deadMarking;
+    ros::Publisher smokingMarking;
+    ros::Publisher biohazardMarking;
+    ros::Publisher dangerMarking;
+    ros::Publisher nuclearMarking;
+    ros::Publisher toxicMarking;
+    ros::Publisher fireMarking;
 	bool marking;
 	int pictureType;
 	double thresholdMatch;
@@ -25,10 +34,10 @@ class ImageSubscriber
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber image_sub_;
 	double distTotal;
-    	double dist;
-    	geometry_msgs::PointStamped p;
+    double dist;
+    geometry_msgs::PointStamped p;
 
-    	ros::Subscriber scanSub_;
+    ros::Subscriber scanSub_;
   
 	cv_bridge::CvImagePtr cv_ptr;
   
@@ -49,7 +58,14 @@ class ImageSubscriber
      		 &ImageSubscriber::imageCb, this);
         scanSub_ = nh_.subscribe<sensor_msgs::LaserScan>("/scan",1,&ImageSubscriber::processLaserScan,this);
 
-        distanceP_ = nh_.advertise<geometry_msgs::PointStamped>("match_location",1);
+        aliveMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_alive",1);
+        deadMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_dead",1);
+        nuclearMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_nuclear",1);
+        smokingMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_smoking",1);
+        dangerMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_danger",1);
+        biohazardMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_biohazard",1);
+        toxicMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_poison",1);
+        fireMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_fire",1);
    			// cv::namedWindow(OPENCV_WINDOW);
   		}
 
@@ -58,8 +74,35 @@ class ImageSubscriber
     		cv::destroyWindow(OPENCV_WINDOW);
   		}
 
-        ros::Publisher getPublisher(){
-            return distanceP_;
+        ros::Publisher getAlivePublisher(){
+            return aliveMarking;
+        }
+        
+        ros::Publisher getDeadPublisher(){
+            return deadMarking;
+        }
+        
+        ros::Publisher getToxicPublisher(){
+            return toxicMarking;
+        }
+        
+        ros::Publisher getSmokingPublisher(){
+            return smokingMarking;
+        }
+        
+        ros::Publisher getNuclearPublisher(){
+            return nuclearMarking;
+        }
+        
+        ros::Publisher getFirePublisher(){
+            return fireMarking;
+        }
+        
+        ros::Publisher getBiohazardPublisher(){
+        }
+        
+        ros::Publisher getDangerPublisher(){
+            return dangerMarking;
         }
 
         geometry_msgs::PointStamped getPointStamped(){
@@ -196,7 +239,7 @@ class ImageSubscriber
    		void setDistance(double disti)
 		{
 			dist = disti;
-			p.header.frame_id = "baselink";
+			p.header.frame_id = "base_link";
 			p.point.x = dist;
 			p.point.y = 0;
 			p.point.z = 0;
@@ -213,9 +256,11 @@ class ImageSubscriber
 
 int main(int argc, char** argv)
 {
+
+			
             //ros::init(argc, argv, "subscriber");
             //ros::NodeHandle nh_;
-
+			
 
   			cv::String dangerString = "/home/turtlebot/danger.png";
   
@@ -256,6 +301,7 @@ int main(int argc, char** argv)
 			
 			
 							cv::Mat tempp = cv::imread( imagess[a]);
+							
 							cv::resize(tempp, tempp, cv::Size(130,130));
 		
 								if(imagess[a].compare(toxicString) == 0)
@@ -296,7 +342,7 @@ int main(int argc, char** argv)
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-                                    ic.setThreshold(0.2); //0.37
+                                    ic.setThreshold(0.37); //0.37
 	    						//	std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -326,24 +372,88 @@ int main(int argc, char** argv)
      							}
      	
      	
-		 
-							ic.setMarking(templateMatching(ic.getImage(), tempp, ic.getThreshold(),ic.getPicType()));
-						
-							if(ic.getMarking())
+		 						//marking is set to testing
+								ic.setMarking(templateMatching(ic.getImage(), tempp, ic.getThreshold(),ic.getPicType()));
+							
+							
+								if(ic.getMarking() && ic.getPicType() == 1)
 								{
 								     
-                                     ic.getPublisher().publish(ic.getPointStamped());
+                                     ic.getToxicPublisher().publish(ic.getPointStamped());
                                      
-									std::cout << "Template found!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+									std::cout << "Template found in toxic !!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
 
 								}
 								
-							else
-							{
+								if(ic.getMarking() && ic.getPicType() == 2)
+								{
+								     
+                                     ic.getDangerPublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found in danger!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 3)
+								{
+								     
+                                     ic.getAlivePublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found in alive!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 4)
+								{
+								     
+                                     ic.getDeadPublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found dead!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 5)
+								{
+								     
+                                     ic.getSmokingPublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found smoking!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 6)
+								{
+								     
+                                     ic.getNuclearPublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found nuclear!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 7)
+								{
+								     
+                                     ic.getFirePublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found in fire!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								if(ic.getMarking() && ic.getPicType() == 8)
+								{
+								     
+                                     ic.getBiohazardPublisher().publish(ic.getPointStamped());
+                                     
+									std::cout << "Template found in biohazard!!!!!!! SO PUBLISHING!!!!! " << ic.getDistance() << "\n";
+
+								}
+								
+								else
+								{
 									
 									
 									std::cout << "NO TEMPLATE FOUND: " << ic.getDistance() << "\n";
-							}
+								}
      
        					}   
                  

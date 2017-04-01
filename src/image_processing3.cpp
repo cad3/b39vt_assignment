@@ -90,7 +90,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
     	if(typePic == 1){
     	
     		std::cout << "Matching found in TOXIC " << matchLoc.x << " The y Point = " << matchLoc.y << "\n";
-    	
+    	    
     	}
     
      	if(typePic == 2){
@@ -129,7 +129,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 
 
 	//not show which template found
-		//cv::imshow( match_window, templ );
+		cv::imshow( match_window, templ );
  		
  		/// Show me what you got
  		cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows 	),   			cv::Scalar::all(0), 2, 8, 0 ); 
@@ -138,9 +138,9 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
  		
 	}
 
-	
-	//cv::imshow( image_window, img_display );
-	//so weird camera not shown
+	cv::imshow( template_window, templ );
+	cv::imshow( image_window, img_display );
+	////so weird camera not shown
 	//cv::imshow( result_window, result ); 
 
 	cv::waitKey(30);
