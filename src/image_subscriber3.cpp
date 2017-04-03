@@ -99,6 +99,7 @@ class ImageSubscriber
         }
         
         ros::Publisher getBiohazardPublisher(){
+        	return biohazardMarking;
         }
         
         ros::Publisher getDangerPublisher(){
@@ -168,7 +169,7 @@ class ImageSubscriber
 
     void processLaserScan (const sensor_msgs::LaserScanConstPtr& scan)
 		{
-		std::cout << "going through processLaserScan " << "\n";
+		//std::cout << "going through processLaserScan " << "\n";
 		double lasrange = (scan->ranges.size());
 		
 		  distj = 0;
@@ -196,12 +197,12 @@ class ImageSubscriber
 		    
 		
  		
-		std::cout << "dividing total by:  " << (lasrange/3) << "\n";
+		//std::cout << "dividing total by:  " << (lasrange/3) << "\n";
 			
-		std::cout << "averagej is:  " << averagej << "\n";
-		std::cout << "setting distance :)   " << "\n";
+		//std::cout << "averagej is:  " << averagej << "\n";
+		//std::cout << "setting distance :)   " << "\n";
 		setDistance(averagej);
-		std::cout << "DIST  " << dist << "\n";
+		//std::cout << "DIST  " << dist << "\n";
 		
 		}
 
@@ -215,24 +216,24 @@ class ImageSubscriber
           
                  if (scan -> ranges[i] == INFINITY || isnan(scan ->ranges[i]))
 					{
-					std::cout << "infinity or nan is happening!!!!!! " << "\n";
+					//std::cout << "infinity or nan is happening!!!!!! " << "\n";
 					dist = 0;
 					
 					}
 				 else
 					{
 					
-					   std::cout << "Not nan " << "\n";
+					   //std::cout << "Not nan " << "\n";
                         distTotal += scan -> ranges[i];
     
         				count++;
         				
 					}
 			}
-			std::cout << "count is:  " << count << "\n";
+			//std::cout << "count is:  " << count << "\n";
 			dist = distTotal/count;
-			std::cout << "dist is:  " << dist << "\n";
-			std::cout << "setting distance :)   " << "\n";
+			//std::cout << "dist is:  " << dist << "\n";
+			//std::cout << "setting distance :)   " << "\n";
 			setDistance(dist);
 		}
 		
@@ -267,7 +268,7 @@ int main(int argc, char** argv)
 
  			cv::String toxicString = "/home/turtlebot/toxic.png";
   
-  			cv::String aliveString = "/home/turtlebot/alive.png";
+  			cv::String aliveString = "/home/turtlebot/darkalive.png";
   
   			cv::String deadString = "/home/turtlebot/dead.png";
   
@@ -299,17 +300,17 @@ int main(int argc, char** argv)
 						for(int a =0; a < 8; a++)
 						{
 			
-			
+			//std::cout << "Matching Value = " << maxVal << "\n";
 							cv::Mat tempp = cv::imread( imagess[a]);
 							
-							cv::resize(tempp, tempp, cv::Size(130,130));
+							cv::resize(tempp, tempp, cv::Size(100,100));
 		
 								if(imagess[a].compare(toxicString) == 0)
 								{
 
 									ic.setPicType(1);
                                     ic.setThreshold(0.35);
-	    						//	std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	    					    	//std::cout << "checking for toxic template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -325,8 +326,8 @@ int main(int argc, char** argv)
      							if(imagess[a].compare(aliveString) == 0)
      							{
      								ic.setPicType(3);
-                                    ic.setThreshold(0.65);
-	    						//	std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.7);
+	    							//std::cout << "checking for alive template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -334,31 +335,31 @@ int main(int argc, char** argv)
      							if(imagess[a].compare(deadString) == 0)
      							{
      								ic.setPicType(4);
-                                    ic.setThreshold(0.65);
-	    						//	std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.6);
+	    							//std::cout << "checking for dead template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-                                    ic.setThreshold(0.37); //0.37
-	    						//	std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.3); //0.37
+	    							//std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(nuclearString) == 0)
      							{
      								ic.setPicType(6);
-                                    ic.setThreshold(0.7);
-	    						//	std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.5);
+	    							//std::cout << "checking for nuclear template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
      							if(imagess[a].compare(fireString) == 0){
      								ic.setPicType(7);
-                                    ic.setThreshold(0.8);
-	    						//	std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+                                    ic.setThreshold(0.45);
+	    						    //std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
@@ -366,8 +367,8 @@ int main(int argc, char** argv)
      							if(imagess[a].compare(biohazardString) == 0)
      							{
      								ic.setPicType(8);
-	     		 					ic.setThreshold(0.4);
-	    						//	std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
+	     		 					ic.setThreshold(0.45);
+	    						    std::cout << "checking for biohazard template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
      	
