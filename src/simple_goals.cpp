@@ -6,12 +6,15 @@
 #include <math.h>
 #include <kobuki_msgs/Led.h>
 
-
+class SimpleGoals
+{
 //initiating methods
-void moveForward();
-void scanCallback();
+//void moveForward();
+//void scanCallback();
+
 
 //declaring publisher
+ros::Subscriber scan_sub;
 ros::Publisher operatorPublisher;
 ros::Publisher led2;
 ros::Publisher led1;
@@ -20,115 +23,149 @@ geometry_msgs::Twist twist;
 kobuki_msgs::Led ledd;
 
 
-float normal_speed = .1; //declaring speed of robot, if its not turning
-float turn_speed = .08;    //declaring speed of robot, if it's turning
-float left = .95;          //speed of rotation, if turning left
-float right= -.95;         //speed of rotation, if turning right
+const static float normal_speed = .1; //declaring speed of robot, if its not turning
+const static float turn_speed = .08;    //declaring speed of robot, if it's turning
+const static float left = .95;          //speed of rotation, if turning left
+const static float right= -.95;         //speed of rotation, if turning right
 
-double minDist = .45;      //minium distance for the robot to avoid obstacles
+const static double minDist = .45;      //minium distance for the robot to avoid obstacles
 
-bool obi;                 //boolean value which declares whether or not an object is in the i section of laserscan
-double disti;             //disti = ranges[i] in for loop where i is incrementing
-double totali;            //totali is all instances of disti added together unless nan or infinity
-double averagei;          //the average is calculated using the totali and ranges.size()/3
+bool obright;                 //boolean value which declares whether or not an object is in the i section of laserscan
+double distRight;             //disti = ranges[i] in for loop where i is incrementing
+double totalRight;            //totali is all instances of disti added together unless nan or infinity
+double averageRight;          //the average is calculated using the totali and ranges.size()/3
 
-bool obj;
-double distj;
-double totalj;
-double averagej;
+bool obMid;
+double distMid;
+double totalMid;
+double averageMid;
 
-bool obk;
-double distk;
-double totalk;
-double averagek;
+bool obLeft;
+double distLeft;
+double totalLeft;
+double averageLeft;
+
+public:
+SimpleGoals(){
+    ros::NodeHandle nodeHandle;
+    operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
+
+    led2 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
+    led1 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
+
+    //subscribe to topic scan and input into method scanCallback
+   // scanSub_ = nh_.subscribe<sensor_msgs::LaserScan>("/scan",1,&ImageSubscriber::processLaserScan,this);
+
+    scan_sub = nodeHandle.subscribe<sensor_msgs::LaserScan>("scan",1,&SimpleGoals::scanCallback,this);
+}
+
+ros::Publisher getPublisher()
+{
+    return operatorPublisher;
+}
+
+ros::Subscriber getSubscriber()
+{
+    return scan_sub;
+}
+
+ros::Publisher getLed1()
+{
+    return led1;
+}
+
+ros::Publisher getLed2()
+{
+    return led2;
+}
 
 void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg) //method to tell the robot where the obstacles are
 {
     double lasrange = (scan_msg->ranges.size());  //lasrange is a variable which stores ranges.size()
     //resetting values to zero
-    disti = 0;
-    totali =0;
-    averagei = 0;
+    distRight = 0;
+    totalRight =0;
+    averageRight = 0;
 
-    distj = 0;
-    totalj =0;
-    averagej = 0;
+    distMid = 0;
+    totalMid =0;
+    averageMid = 0;
 
-    distk =0;
-    totalk = 0;
-    averagek = 0;
+    distLeft =0;
+    totalLeft = 0;
+    averageLeft = 0;
 
     //for loop to calculate total number of distances in the first third of the array ranges from LaserScan
     for (int i=0; i < (lasrange/3); i++)
     {
-        disti = (scan_msg->ranges[i]);
+        distRight = (scan_msg->ranges[i]);
 
         //conditional statements to make sure infinity and nan aren't added into the totali found
-        if(!isnan(disti) && !isinf(disti))
+        if(!isnan(distRight) && !isinf(distRight))
         {
-            totali += disti;
+            totalRight += distRight;
         }
     }
 
     //average distance in section i
-    averagei = totali/(lasrange/3);
+    averageRight = totalRight/(lasrange/3);
 
    //if averagei is less or equal to the minDist then there's an obstacle
-    if(averagei <= minDist)
+    if(averageRight <= minDist)
     {
-        obi = true;
+        obright = true;
     }
 
     //if averagi is greater or equal to the minDist then there's NO obstacle
-    if(averagei >= minDist)
+    if(averageRight >= minDist)
     {
-        obi = false;
+        obright = false;
     }
 
     //same approach as used for i above but with the second two thirds of ranges[] looked at (j)
     for (int j=lasrange/3; j < 2*(lasrange/3); j++)
     {
-        distj = scan_msg->ranges[j];
+        distMid = scan_msg->ranges[j];
 
-        if(!isnan(distj) && !isinf(distj))
+        if(!isnan(distMid) && !isinf(distMid))
         {
-            totalj += distj;
+            totalMid += distMid;
         }
      }
 
-    averagej = totalj/(lasrange/3);
+    averageMid = totalMid/(lasrange/3);
 
-    if(averagej <= minDist)
+    if(averageMid <= minDist)
     {
-        obj = true;
+        obMid = true;
     }
 
-    if(averagej >= minDist)
+    if(averageMid >= minDist)
     {
-        obj = false;
+        obMid = false;
     }
 
     //same approach as used for j above but with last third of ranges[] looked at (k)
     for (int k=2*(lasrange/3); k<= lasrange; k++)
     {
-        distk = (scan_msg->ranges[k]);
+        distLeft = (scan_msg->ranges[k]);
 
-        if(!isnan(distk) && !isinf(distk))
+        if(!isnan(distLeft) && !isinf(distLeft))
         {
-            totalk += distk;
+            totalLeft += distLeft;
         }
     }
 
-    averagek = totalk/(lasrange/3);
+    averageLeft = totalLeft/(lasrange/3);
 
-    if(averagek <= minDist)
+    if(averageLeft <= minDist)
     {
-        obk = true;
+        obLeft = true;
     }
 
-    if(averagek >= minDist)
+    if(averageLeft >= minDist)
     {
-        obk = false;
+        obLeft = false;
     }
 
 }
@@ -138,12 +175,12 @@ void moveForward()     //method that sets the velocity of the robot
     //declaring variable to switch velocity
     //lights
     //if there's obstacles on all sides
-    if((obj == true) && (obi == true) && (obk == true))
+    if((obMid == true) && (obright == true) && (obLeft == true))
     {
 
         std::cout << "obstacles everywhere" << std::endl;
 
-        if(averagei >= averagej && averagei >= averagek)  //if obstacle furthest from robot is in section i
+        if(averageRight >= averageMid && averageRight >= averageLeft)  //if obstacle furthest from robot is in section i
         {
             //robot moving & turning right
             twist.linear.x = turn_speed;
@@ -155,7 +192,7 @@ void moveForward()     //method that sets the velocity of the robot
             led2.publish(ledd);
         }
 
-        if(averagej >= averagei && averagej >= averagek)  //if obstacle furthest from robot is in section j
+        if(averageMid >= averageRight && averageMid >= averageLeft)  //if obstacle furthest from robot is in section j
         {
             //robot going backwards
             twist.linear.x = -(normal_speed);
@@ -166,7 +203,7 @@ void moveForward()     //method that sets the velocity of the robot
             led2.publish(ledd);
         }
 
-        if(averagek >= averagei && averagek >= averagej)  //if obstacle furthest from robot is in section k
+        if(averageLeft >= averageRight && averageLeft >= averageMid)  //if obstacle furthest from robot is in section k
         {
             //robot moving and going left
             twist.linear.x = turn_speed;
@@ -180,11 +217,11 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == false) && (obj == true) && (obk == false) )
+    if((obright == false) && (obMid == true) && (obLeft == false) )
     {
 
         std::cout << "obstacle in front" << std::endl;
-        if(averagei >= averagek)
+        if(averageRight >= averageLeft)
         {
              //robot moving & turning right
              twist.linear.x = turn_speed;
@@ -211,7 +248,7 @@ void moveForward()     //method that sets the velocity of the robot
         }
     }
 
-    if((obi == true) && (obj == false) && (obk == true) )
+    if((obright == true) && (obMid == false) && (obLeft == true) )
     {
 
         //robot just moving forward
@@ -224,7 +261,7 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == true) && (obj == false) && (obk == false))
+    if((obright == true) && (obMid == false) && (obLeft == false))
     {
 
         //robot moving and turning left
@@ -238,7 +275,7 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == false) && (obj == true) && (obk == true))
+    if((obright == false) && (obMid == true) && (obLeft == true))
     {
 
         //robot moving & turning right
@@ -252,7 +289,7 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == true) && (obj == true)  && (obk == false) )
+    if((obright == true) && (obMid == true)  && (obLeft == false) )
     {
 
         twist.linear.x = 0;
@@ -265,7 +302,7 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == false) && (obj == false) && (obk == true))
+    if((obright == false) && (obMid == false) && (obLeft == true))
     {
         twist.linear.x = turn_speed;
         twist.angular.z = right;
@@ -277,7 +314,7 @@ void moveForward()     //method that sets the velocity of the robot
 
     }
 
-    if((obi == false) && (obj == false) && (obk == false))
+    if((obright == false) && (obMid == false) && (obLeft == false))
     {
         twist.linear.x = normal_speed;
         twist.angular.z = 0;
@@ -290,27 +327,24 @@ void moveForward()     //method that sets the velocity of the robot
 
     operatorPublisher.publish(twist);
 }
+};
 
 int main(int argc, char **argv)
 {
      ROS_INFO("UPDATTTTTING");
     //declaring node
     ros::init(argc, argv, "move_turtle");
-    ros::NodeHandle nodeHandle;
+
+
+    SimpleGoals sg;
 
     //set publisher which determines velocity of the robot
-    operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
-    led2 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
-    led1 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
-
-    //subscribe to topic scan and input into method scanCallback
-    ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
     ros::Rate loopRate(15);
 
     while(ros::ok())
     {
-        moveForward();
+        sg.moveForward();
         ROS_INFO("Published Twist");
         ROS_INFO("Published Led");
         loopRate.sleep();
