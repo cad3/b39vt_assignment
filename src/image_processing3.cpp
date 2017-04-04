@@ -33,7 +33,7 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
 	
     //cv::imshow( template_window, templ );
 
-	cv::waitKey(3);  
+	//cv::waitKey(3);  
 	
 	
 
@@ -144,12 +144,12 @@ bool templateMatching(const cv::Mat& img, const cv::Mat& templ,double threshold,
  		
 	}
 
-	cv::imshow( template_window, templ );
-	cv::imshow( image_window, img_display );
+	//cv::imshow( template_window, templ );
+	//cv::imshow( image_window, img_display );
 	////so weird camera not shown
 	//cv::imshow( result_window, result ); 
 
-	cv::waitKey(30);
+	//cv::waitKey(30);
 
     return testing;
 

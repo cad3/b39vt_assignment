@@ -6,18 +6,36 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <std_msgs/String.h>
 #include "ros/ros.h"
+#include <tf/tf.h>
 #include <sensor_msgs/LaserScan.h>
 #include "b39vt_assignment/image_processing.hpp"
 #include <geometry_msgs/PointStamped.h>
+#include <tf/transform_listener.h>
+
+
+
+
 
 class ImageSubscriber
 {
+
+     //transform code
+
+
+
+
+    tf::TransformListener listener;
+
+
+
 	int count;
 	double distj;
     double totalj;
     double averagej;
     
-    
+    ros::Publisher mapPublish;
+    ros::Publisher basePublish;
+
     ros::Publisher aliveMarking;
     ros::Publisher deadMarking;
     ros::Publisher smokingMarking;
@@ -38,6 +56,8 @@ class ImageSubscriber
     geometry_msgs::PointStamped p;
 
     ros::Subscriber scanSub_;
+
+
   
 	cv_bridge::CvImagePtr cv_ptr;
   
@@ -58,14 +78,17 @@ class ImageSubscriber
      		 &ImageSubscriber::imageCb, this);
         scanSub_ = nh_.subscribe<sensor_msgs::LaserScan>("/scan",1,&ImageSubscriber::processLaserScan,this);
 
-        aliveMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_alive",1);
-        deadMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_dead",1);
-        nuclearMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_nuclear",1);
-        smokingMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_smoking",1);
-        dangerMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_danger",1);
-        biohazardMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_biohazard",1);
-        toxicMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_poison",1);
-        fireMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_fire",1);
+        mapPublish = nh_.advertise<geometry_msgs::PoseStamped>("transformed_map", 10);
+        basePublish = nh_.advertise<geometry_msgs::PoseStamped>("base", 10);
+
+        aliveMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_alive",10);
+        deadMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_dead",20);
+        nuclearMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_nuclear",30);
+        smokingMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_smoking",20);
+        dangerMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_danger",30);
+        biohazardMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_biohazard",20);
+        toxicMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_poison",10);
+        fireMarking = nh_.advertise<geometry_msgs::PointStamped>("match_location_fire",50);
    			// cv::namedWindow(OPENCV_WINDOW);
   		}
 
@@ -73,6 +96,28 @@ class ImageSubscriber
   		{
     		cv::destroyWindow(OPENCV_WINDOW);
   		}
+
+        void setTransform(geometry_msgs::PoseStamped pBase, geometry_msgs::PoseStamped pMap, ros::Time current_transform)
+        {
+        pBase.header.frame_id = "/base_link";
+        pBase.pose.position.x = 0.0;
+        pBase.pose.position.y = 0.0;
+        pBase.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+
+        listener.getLatestCommonTime(pBase.header.frame_id, "map", current_transform, NULL);
+        pBase.header.stamp = current_transform;
+        ROS_INFO_STREAM("TRANSFORMING FROM BASE_LINK TO MAP");
+        listener.transformPose("map", pBase, pMap);
+
+        basePublish.publish(pBase);
+        mapPublish.publish(pMap);
+
+        // pMap now contains the pose of the robot transformed into map
+        // coordinates according to the TF data available at time "current_transform"
+
+        //end of transform code
+        }
+
 
         ros::Publisher getAlivePublisher(){
             return aliveMarking;
@@ -109,6 +154,8 @@ class ImageSubscriber
         geometry_msgs::PointStamped getPointStamped(){
             return p;
         }
+
+
 
   		void imageCb(const sensor_msgs::ImageConstPtr& msg)
   		{
@@ -194,49 +241,11 @@ class ImageSubscriber
 
     	averagej = totalj/(lasrange/3);
           
-		    
-		
- 		
-		//std::cout << "dividing total by:  " << (lasrange/3) << "\n";
-			
-		//std::cout << "averagej is:  " << averagej << "\n";
-		//std::cout << "setting distance :)   " << "\n";
 		setDistance(averagej);
-		//std::cout << "DIST  " << dist << "\n";
-		
-		}
 
-
-         void processLaserScan1 (const sensor_msgs::LaserScanConstPtr& scan)
-		{
-		    count = 0;
-		std::cout << "going through processLaserScan " << "\n";
- 			for (int i=246; i<266; i++)
-			{
-          
-                 if (scan -> ranges[i] == INFINITY || isnan(scan ->ranges[i]))
-					{
-					//std::cout << "infinity or nan is happening!!!!!! " << "\n";
-					dist = 0;
-					
-					}
-				 else
-					{
-					
-					   //std::cout << "Not nan " << "\n";
-                        distTotal += scan -> ranges[i];
-    
-        				count++;
-        				
-					}
-			}
-			//std::cout << "count is:  " << count << "\n";
-			dist = distTotal/count;
-			//std::cout << "dist is:  " << dist << "\n";
-			//std::cout << "setting distance :)   " << "\n";
-			setDistance(dist);
 		}
 		
+        //SETS POINT WHERE IMAGE FOUND IN TERMS OF BASELINK (STILL HAS TO BE CONVERTED TO MAP)
    		void setDistance(double disti)
 		{
 			dist = disti;
@@ -258,10 +267,11 @@ class ImageSubscriber
 int main(int argc, char** argv)
 {
 
-			
+            //tf::TransformListener listener;
             //ros::init(argc, argv, "subscriber");
             //ros::NodeHandle nh_;
-			
+
+
 
   			cv::String dangerString = "/home/turtlebot/danger.png";
   
@@ -285,6 +295,10 @@ int main(int argc, char** argv)
   
   
   			ros::init(argc, argv, "image_subscriber");
+
+            geometry_msgs::PoseStamped pBase, pMap;
+
+
   			
   			ImageSubscriber ic;
  
@@ -294,8 +308,17 @@ int main(int argc, char** argv)
 
   			while (ros::ok())
   			{
+                 ROS_INFO_STREAM("AJ is the best");
+
+                 ROS_INFO_STREAM("Better than all the rest");
+                 ic.setTransform(pBase, pMap, ros::Time::now());
 				if (ic.data_valid)
 					{
+
+                    // ros::Time current_transform = ros::Time::now();
+
+
+
       				
 						for(int a =0; a < 8; a++)
 						{
@@ -343,7 +366,7 @@ int main(int argc, char** argv)
      							if(imagess[a].compare(smokingString) == 0)
      							{
      								ic.setPicType(5);
-                                    ic.setThreshold(0.3); //0.37
+                                    ic.setThreshold(0.37); //0.37
 	    							//std::cout << "checking for smoking template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
@@ -358,7 +381,7 @@ int main(int argc, char** argv)
      	
      							if(imagess[a].compare(fireString) == 0){
      								ic.setPicType(7);
-                                    ic.setThreshold(0.45);
+                                    ic.setThreshold(0.5); //0.45
 	    						    //std::cout << "checking for fire template & changing thresholdMatch" << ic.getThreshold() << "\n"; 
 	
      							}
