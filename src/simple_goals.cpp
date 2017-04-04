@@ -81,7 +81,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg) //method to
 
     //if averagi is greater or equal to the minDist then there's NO obstacle
     if(averagei >= minDist)
-    {   
+    {
         obi = false;
     }
 
@@ -104,8 +104,8 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg) //method to
     }
 
     if(averagej >= minDist)
-    { 
-        obj = false;  
+    {
+        obj = false;
     }
 
     //same approach as used for j above but with last third of ranges[] looked at (k)
@@ -123,7 +123,7 @@ void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg) //method to
 
     if(averagek <= minDist)
     {
-        obk = true;       
+        obk = true;
     }
 
     if(averagek >= minDist)
@@ -291,18 +291,19 @@ void moveForward()     //method that sets the velocity of the robot
     operatorPublisher.publish(twist);
 }
 
-void startObstacleAvoidance(){
-
-  //declaring node
+int main(int argc, char **argv)
+{
+     ROS_INFO("UPDATTTTTING");
+    //declaring node
     ros::init(argc, argv, "move_turtle");
     ros::NodeHandle nodeHandle;
-    
+
     //set publisher which determines velocity of the robot
     operatorPublisher = nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",1000);
 
     led2 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led2",1000);
     led1 = nodeHandle.advertise<kobuki_msgs::Led>("/mobile_base/commands/led1",1000);
-    
+
     //subscribe to topic scan and input into method scanCallback
     ros::Subscriber scan_sub = nodeHandle.subscribe("scan", 1000, scanCallback);
     ros::Rate loopRate(15);
@@ -316,30 +317,5 @@ void startObstacleAvoidance(){
         ros::spinOnce();
     }
 
-}
-
-int main(int argc, char **argv)
-{
-    startObstacleAvoidance();
-
     return EXIT_SUCCESS;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
