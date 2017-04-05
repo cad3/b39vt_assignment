@@ -23,7 +23,7 @@ geometry_msgs::Twist twist;
 kobuki_msgs::Led ledd;
 
 
-const static float normal_speed = .1; //declaring speed of robot, if its not turning
+const static float normal_speed = .08; //declaring speed of robot, if its not turning
 const static float turn_speed = .08;    //declaring speed of robot, if it's turning
 const static float left = .95;          //speed of rotation, if turning left
 const static float right= -.95;         //speed of rotation, if turning right
